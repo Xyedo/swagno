@@ -2,6 +2,7 @@ package swagno
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"testing"
 
@@ -68,6 +69,16 @@ func TestSwaggerGeneration(t *testing.T) {
 					endpoint.WithErrors([]response.Response{response.New(models.UnsuccessfulResponse{}, "400", "Bad Request")}),
 					endpoint.WithProduce([]mime.MIME{mime.JSON, mime.XML}),
 				),
+				endpoint.New(
+					endpoint.PUT,
+					"/product/upload",
+					endpoint.WithTags("product"),
+					endpoint.WithBody(models.ProductUpload{}),
+					endpoint.WithConsume([]mime.MIME{mime.MULTIFORM}),
+					endpoint.WithSuccessfulReturns([]response.Response{response.New(models.SuccessfulResponse{}, "200", "OK")}),
+					endpoint.WithErrors([]response.Response{response.New(models.UnsuccessfulResponse{}, "400", "Bad Request")}),
+					endpoint.WithProduce([]mime.MIME{mime.JSON}),
+				),
 			},
 			file: "testdata/expected_output/bft.json",
 		},
@@ -115,6 +126,8 @@ func TestSwaggerGeneration(t *testing.T) {
 			got.AddEndpoints(tc.endpoints)
 			got.generateSwaggerJson()
 
+			v, _ := json.MarshalIndent(got, "", "  ")
+			log.Println(string(v))
 			if diff := cmp.Diff(want, got, cmpopts.IgnoreFields(Swagger{}, "endpoints"), cmpopts.IgnoreFields(definition.DefinitionProperties{}, "Example", "IsRequired")); diff != "" {
 				t.Errorf("JsonSwagger() mismatch (-expected +got):\n%s", diff)
 			}

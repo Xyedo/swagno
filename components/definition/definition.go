@@ -183,6 +183,8 @@ func (g DefinitionGenerator) createStructDefinitions(structType reflect.Type) ma
 				properties[fieldJsonTag] = g.timeProperty(field, isRequiredField)
 			} else if field.Type.String() == "time.Duration" {
 				properties[fieldJsonTag] = g.durationProperty(field, isRequiredField)
+			} else if field.Type.String() == "multipart.FileHeader" {
+				properties[fieldJsonTag] = g.fileProperty(field, isRequiredField)
 			} else {
 				properties[fieldJsonTag] = DefinitionProperties{
 					Example:    fields.ExampleTag(field),
@@ -202,8 +204,10 @@ func (g DefinitionGenerator) createStructDefinitions(structType reflect.Type) ma
 			if field.Type.Elem().Kind() == reflect.Struct {
 				if field.Type.Elem().String() == "time.Time" {
 					properties[fieldJsonTag] = g.timeProperty(field, false)
-				} else if field.Type.String() == "time.Duration" {
+				} else if field.Type.Elem().String() == "time.Duration" {
 					properties[fieldJsonTag] = g.durationProperty(field, false)
+				} else if field.Type.Elem().String() == "multipart.FileHeader" {
+					properties[fieldJsonTag] = g.fileProperty(field, false)
 				} else {
 					properties[fieldJsonTag] = g.refProperty(field, false)
 					g.CreateDefinition(reflect.New(field.Type.Elem()).Elem().Interface())
@@ -300,6 +304,16 @@ func (g DefinitionGenerator) durationProperty(field reflect.StructField, require
 		Type:       "integer",
 		IsRequired: required,
 	}
+}
+
+func (g DefinitionGenerator) fileProperty(field reflect.StructField, required bool) DefinitionProperties {
+	return DefinitionProperties{
+		Example:    fields.ExampleTag(field),
+		Type:       "string",
+		Format:     "binary",
+		IsRequired: required,
+	}
+
 }
 
 func (g DefinitionGenerator) refProperty(field reflect.StructField, required bool) DefinitionProperties {

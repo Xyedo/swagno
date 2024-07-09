@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"mime/multipart"
+	"time"
+)
 
 type Product struct {
 	Id             uint64                    `json:"id"`
@@ -34,6 +37,11 @@ type ProductPost struct {
 	Name       string  `json:"name" example:"John Smith"`
 	MerchantId uint64  `json:"merchant_id" example:"123456"`
 	CategoryId *uint64 `json:"category_id,omitempty" example:"123"`
+}
+
+type ProductUpload struct {
+	FileName string                `json:"name" example:"product" form:"filename"`
+	File     *multipart.FileHeader `json:"file" form:"file"`
 }
 
 type ErrorResponse struct {
